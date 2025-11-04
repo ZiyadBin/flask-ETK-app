@@ -1,4 +1,5 @@
-// TEMPORARY: Force set the Apps Script URL
+// FORCE REAL BACKEND MODE
+window.forceRealMode = true;
 localStorage.setItem('scriptUrl', 'https://script.google.com/macros/s/AKfycbyoDiH1A_GTANz_okwiM9X2nB3BlOB69pWj2KUcOirHkEgVaBX46COeW3Z0wJvpzHz3/exec');
 // Configuration
 const CONFIG = {
