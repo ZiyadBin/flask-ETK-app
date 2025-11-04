@@ -4,425 +4,203 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Train Ticket System</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: Arial, sans-serif;
-            background: #f8f9fa;
-            line-height: 1.6;
-        }
-
-        .screen {
-            display: none;
-        }
-
-        .screen.active {
-            display: block;
-        }
-
-        /* Login Screen */
-        .login-container {
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            padding: 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-
-        .login-container h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-        }
-
-        .login-box {
-            background: white;
-            padding: 40px;
-            border-radius: 10px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            color: #333;
-            width: 100%;
-            max-width: 400px;
-        }
-
-        .login-form {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            margin: 20px 0;
-        }
-
-        .login-form input {
-            padding: 15px;
-            border: 2px solid #ddd;
-            border-radius: 5px;
-            font-size: 16px;
-            transition: border-color 0.3s;
-        }
-
-        .login-form input:focus {
-            border-color: #667eea;
-            outline: none;
-        }
-
-        .login-btn {
-            padding: 15px;
-            background: #667eea;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-
-        .login-btn:hover {
-            background: #5a6fd8;
-        }
-
-        .login-note {
-            color: #666;
-            font-size: 14px;
-            margin-top: 10px;
-        }
-
-        /* Main App */
-        .app-header {
-            background: white;
-            padding: 15px 20px;
-            border-bottom: 1px solid #e0e0e0;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-
-        .header-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .app-nav {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-            overflow-x: auto;
-        }
-
-        .nav-btn {
-            padding: 12px 20px;
-            background: #f8f9fa;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            white-space: nowrap;
-            transition: all 0.3s;
-        }
-
-        .nav-btn.active {
-            background: #667eea;
-            color: white;
-        }
-
-        .page {
-            display: none;
-            padding: 20px;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .page.active {
-            display: block;
-        }
-
-        .page-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-
-        .call-form {
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-
-        .form-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .form-group label {
-            font-weight: bold;
-            margin-bottom: 8px;
-            color: #333;
-        }
-
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
-            padding: 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 5px;
-            font-size: 16px;
-            transition: border-color 0.3s;
-        }
-
-        .form-group input:focus,
-        .form-group select:focus,
-        .form-group textarea:focus {
-            border-color: #667eea;
-            outline: none;
-        }
-
-        .passengers-section {
-            margin-bottom: 30px;
-        }
-
-        .passenger-row {
-            display: grid;
-            grid-template-columns: 2fr 1fr 1fr 2fr;
-            gap: 10px;
-            margin-bottom: 10px;
-        }
-
-        @media (max-width: 768px) {
-            .passenger-row {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .btn-primary {
-            background: #667eea;
-            color: white;
-            padding: 12px 24px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: background 0.3s;
-        }
-
-        .btn-primary:hover {
-            background: #5a6fd8;
-        }
-
-        .btn-secondary {
-            background: #6c757d;
-            color: white;
-            padding: 12px 24px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: background 0.3s;
-        }
-
-        .btn-secondary:hover {
-            background: #5a6268;
-        }
-
-        .form-actions {
-            display: flex;
-            gap: 15px;
-            margin-top: 30px;
-            flex-wrap: wrap;
-        }
-
-        .queue-item {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            margin-bottom: 15px;
-            border-left: 4px solid #667eea;
-        }
-
-        .status-badge {
-            padding: 5px 10px;
-            border-radius: 15px;
-            font-size: 12px;
-            font-weight: bold;
-        }
-
-        .status-received { background: #fff3cd; color: #856404; }
-        .status-booked { background: #d1ecf1; color: #0c5460; }
-
-        #login-status {
-            margin-top: 15px;
-            padding: 10px;
-            border-radius: 5px;
-        }
-
-        .success { background: #d4edda; color: #155724; }
-        .error { background: #f8d7da; color: #721c24; }
-    </style>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <!-- Login Screen -->
-    <div id="login-screen" class="screen active">
-        <div class="login-container">
-            <div class="login-box">
-                <h1>🚆 Train Ticket System</h1>
-                <p>Enter your email to get started</p>
-                
-                <div class="login-form">
-                    <input type="email" id="login-email" placeholder="your@email.com" required>
-                    <button type="button" class="login-btn" onclick="handleLogin()">
-                        Sign In & Get Started
-                    </button>
+    <div id="app">
+        <!-- Login Screen -->
+        <div id="login-screen" class="screen active">
+            <div class="login-container">
+                <div class="login-box">
+                    <h1>🚆 Train Ticket System</h1>
+                    <p>Enter your email to continue</p>
+                    
+                    <div class="login-form">
+                        <input type="email" id="login-email" placeholder="your@email.com" required>
+                        <button type="button" class="login-btn" onclick="handleLogin()">
+                            Sign In
+                        </button>
+                    </div>
+                    
+                    <p class="login-note">Your email must be authorized by admin</p>
+                    <div id="login-status"></div>
+                    <div id="api-status" class="api-status"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main App -->
+        <div id="main-app" class="screen">
+            <header class="app-header">
+                <div class="header-content">
+                    <h2>Train Ticket System</h2>
+                    <div class="user-info">
+                        <span id="user-name"></span>
+                        <button onclick="logout()" class="btn-secondary">Logout</button>
+                    </div>
+                </div>
+                <nav class="app-nav">
+                    <button class="nav-btn active" onclick="showPage('quick-entry')">Quick Entry</button>
+                    <button class="nav-btn" onclick="showPage('queue')">Ticket Queue</button>
+                    <button class="nav-btn" onclick="showPage('reports')">Reports</button>
+                    <button class="nav-btn" onclick="showPage('admin')" id="admin-btn">Admin</button>
+                </nav>
+            </header>
+
+            <!-- Quick Entry Page -->
+            <div id="quick-entry" class="page active">
+                <div class="page-header">
+                    <h2>Quick Call Entry</h2>
+                    <button onclick="saveDraft()" class="btn-secondary">Save Draft</button>
                 </div>
                 
-                <p class="login-note">Any email will work for demonstration</p>
-                <div id="login-status"></div>
+                <div class="call-form">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="from-station">From Station *</label>
+                            <input type="text" id="from-station" list="stations" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="to-station">To Station *</label>
+                            <input type="text" id="to-station" list="stations" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="class">Class *</label>
+                            <select id="class" required>
+                                <option value="">Select Class</option>
+                                <option value="Sleeper">Sleeper</option>
+                                <option value="3A">3A</option>
+                                <option value="2A">2A</option>
+                                <option value="1A">1A</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="journey-date">Journey Date *</label>
+                            <input type="date" id="journey-date" required>
+                        </div>
+                    </div>
+
+                    <div class="passengers-section">
+                        <h3>Passengers</h3>
+                        <div id="passengers-list">
+                            <div class="passenger-row">
+                                <input type="text" placeholder="Name *" class="passenger-name" required>
+                                <input type="number" placeholder="Age" class="passenger-age" min="1" max="120">
+                                <select class="passenger-gender">
+                                    <option value="">Gender</option>
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                                <input type="tel" placeholder="Mobile" class="passenger-mobile">
+                            </div>
+                        </div>
+                        <button type="button" onclick="addPassenger()" class="btn-secondary">
+                            + Add Passenger
+                        </button>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="remark">Remarks</label>
+                        <textarea id="remark" rows="3" placeholder="Any special requirements or notes..."></textarea>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" onclick="saveCall('draft')" class="btn-secondary">Save as Draft</button>
+                        <button type="button" onclick="saveCall('queue')" class="btn-primary">Save & Send to Queue</button>
+                    </div>
+                </div>
+
+                <!-- Duplicate Warning -->
+                <div id="duplicate-warning" class="warning-banner hidden">
+                    <div class="warning-content">
+                        <strong>Possible duplicate found!</strong>
+                        <span id="duplicate-count"></span>
+                        <button onclick="showDuplicateDetails()" class="btn-text">View Details</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Other pages (Queue, Reports, Admin) -->
+            <div id="queue" class="page">
+                <div class="page-header">
+                    <h2>Ticket Queue</h2>
+                    <div>
+                        <select id="queue-filter" onchange="loadQueue()">
+                            <option value="all">All Tickets</option>
+                            <option value="received">Received</option>
+                            <option value="assigned">Assigned</option>
+                            <option value="booked">Booked</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="queue-content">
+                    <!-- Tickets will be loaded here -->
+                </div>
+            </div>
+
+            <div id="reports" class="page">
+                <div class="page-header">
+                    <h2>Reports</h2>
+                    <div>
+                        <input type="date" id="report-from">
+                        <input type="date" id="report-to">
+                        <button onclick="generateReport()" class="btn-primary">Generate</button>
+                    </div>
+                </div>
+                <div id="report-content">
+                    <!-- Reports will appear here -->
+                </div>
+            </div>
+
+            <div id="admin" class="page">
+                <div class="page-header">
+                    <h2>Admin Panel</h2>
+                </div>
+                <div class="call-form">
+                    <h3>System Configuration</h3>
+                    <div class="form-group">
+                        <label>Backend Status:</label>
+                        <span id="backend-status">Checking...</span>
+                    </div>
+                    <div class="form-group">
+                        <label>Apps Script URL:</label>
+                        <input type="text" id="script-url" placeholder="Paste your Apps Script URL here">
+                        <button onclick="saveScriptUrl()" class="btn-primary">Save URL</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Main App -->
-    <div id="main-app" class="screen">
-        <header class="app-header">
-            <div class="header-content">
-                <h2>Train Ticket System</h2>
-                <div class="user-info">
-                    <span id="user-name"></span>
-                    <button onclick="logout()" class="btn-secondary">Logout</button>
+    <!-- Modals -->
+    <div id="booking-modal" class="modal hidden">
+        <div class="modal-content">
+            <h3>Mark as Booked</h3>
+            <form id="booking-form">
+                <input type="hidden" id="booking-call-id">
+                <div class="form-group">
+                    <label for="ticket-number">Ticket Number *</label>
+                    <input type="text" id="ticket-number" required>
                 </div>
-            </div>
-            <nav class="app-nav">
-                <button class="nav-btn active" onclick="showPage('quick-entry')">Quick Entry</button>
-                <button class="nav-btn" onclick="showPage('queue')">Ticket Queue</button>
-                <button class="nav-btn" onclick="showPage('reports')">Reports</button>
-                <button class="nav-btn" onclick="showPage('admin')" id="admin-btn">Admin</button>
-            </nav>
-        </header>
-
-        <!-- Quick Entry Page -->
-        <div id="quick-entry" class="page active">
-            <div class="page-header">
-                <h2>Quick Call Entry</h2>
-                <button onclick="saveDraft()" class="btn-secondary">Save Draft</button>
-            </div>
-            
-            <div class="call-form">
                 <div class="form-grid">
                     <div class="form-group">
-                        <label for="from-station">From Station *</label>
-                        <input type="text" id="from-station" list="stations" required>
+                        <label for="service-charge">Service Charge</label>
+                        <input type="number" id="service-charge" step="0.01">
                     </div>
                     <div class="form-group">
-                        <label for="to-station">To Station *</label>
-                        <input type="text" id="to-station" list="stations" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="class">Class *</label>
-                        <select id="class" required>
-                            <option value="">Select Class</option>
-                            <option value="Sleeper">Sleeper</option>
-                            <option value="3A">3A</option>
-                            <option value="2A">2A</option>
-                            <option value="1A">1A</option>
+                        <label for="payment-status">Payment Status</label>
+                        <select id="payment-status">
+                            <option value="unpaid">Unpaid</option>
+                            <option value="paid">Paid</option>
                         </select>
                     </div>
-                    <div class="form-group">
-                        <label for="journey-date">Journey Date *</label>
-                        <input type="date" id="journey-date" required>
-                    </div>
                 </div>
-
-                <div class="passengers-section">
-                    <h3>Passengers</h3>
-                    <div id="passengers-list">
-                        <div class="passenger-row">
-                            <input type="text" placeholder="Name *" class="passenger-name" required>
-                            <input type="number" placeholder="Age" class="passenger-age" min="1" max="120">
-                            <select class="passenger-gender">
-                                <option value="">Gender</option>
-                                <option value="Male">Male</option>
-                                <option value="Female">Female</option>
-                                <option value="Other">Other</option>
-                            </select>
-                            <input type="tel" placeholder="Mobile" class="passenger-mobile">
-                        </div>
-                    </div>
-                    <button type="button" onclick="addPassenger()" class="btn-secondary" style="margin-top: 10px;">
-                        + Add Passenger
-                    </button>
+                <div class="modal-actions">
+                    <button type="button" onclick="closeModal('booking-modal')" class="btn-secondary">Cancel</button>
+                    <button type="submit" class="btn-primary">Save Booking</button>
                 </div>
-
-                <div class="form-group">
-                    <label for="remark">Remarks</label>
-                    <textarea id="remark" rows="3" placeholder="Any special requirements or notes..."></textarea>
-                </div>
-
-                <div class="form-actions">
-                    <button type="button" onclick="saveCall('draft')" class="btn-secondary">Save as Draft</button>
-                    <button type="button" onclick="saveCall('queue')" class="btn-primary">Save & Send to Queue</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Queue Page -->
-        <div id="queue" class="page">
-            <div class="page-header">
-                <h2>Ticket Queue</h2>
-                <div>
-                    <select id="queue-filter" onchange="loadQueue()">
-                        <option value="all">All Tickets</option>
-                        <option value="received">Received</option>
-                        <option value="booked">Booked</option>
-                    </select>
-                </div>
-            </div>
-            <div id="queue-content">
-                <!-- Tickets will appear here -->
-            </div>
-        </div>
-
-        <!-- Reports Page -->
-        <div id="reports" class="page">
-            <div class="page-header">
-                <h2>Reports & Analytics</h2>
-                <div>
-                    <input type="date" id="report-from">
-                    <input type="date" id="report-to">
-                    <button onclick="generateReport()" class="btn-primary">Generate</button>
-                </div>
-            </div>
-            <div id="report-content">
-                <!-- Reports will appear here -->
-            </div>
-        </div>
-
-        <!-- Admin Page -->
-        <div id="admin" class="page">
-            <div class="page-header">
-                <h2>Admin Panel</h2>
-            </div>
-            <div class="call-form">
-                <h3>System Information</h3>
-                <p>This is a demo version. In production, this would connect to Google Sheets.</p>
-                <button onclick="initializeDemoData()" class="btn-primary">Load Demo Data</button>
-            </div>
+            </form>
         </div>
     </div>
 
@@ -439,335 +217,6 @@
         <option value="Lucknow">
     </datalist>
 
-    <script>
-        // Global variables
-        let currentUser = null;
-        let tickets = JSON.parse(localStorage.getItem('tickets') || '[]');
-
-        // Login function
-        function handleLogin() {
-            const emailInput = document.getElementById('login-email');
-            const statusDiv = document.getElementById('login-status');
-            const email = emailInput.value.trim();
-            
-            if (!email) {
-                showStatus('Please enter your email address', 'error');
-                return;
-            }
-            
-            if (!isValidEmail(email)) {
-                showStatus('Please enter a valid email address', 'error');
-                return;
-            }
-            
-            showStatus('Logging you in...', 'success');
-            
-            // Simulate login process
-            setTimeout(() => {
-                currentUser = {
-                    email: email,
-                    staff_id: 'user_' + Math.random().toString(36).substr(2, 9),
-                    role: 'admin'
-                };
-                
-                showMainApp();
-                showStatus('Login successful!', 'success');
-            }, 1000);
-        }
-
-        function showStatus(message, type) {
-            const statusDiv = document.getElementById('login-status');
-            statusDiv.textContent = message;
-            statusDiv.className = type;
-            statusDiv.style.display = 'block';
-        }
-
-        function isValidEmail(email) {
-            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-        }
-
-        function showMainApp() {
-            document.getElementById('login-screen').classList.remove('active');
-            document.getElementById('main-app').classList.add('active');
-            
-            document.getElementById('user-name').textContent = currentUser.email;
-            
-            // Set default dates
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('journey-date').value = today;
-            document.getElementById('report-from').value = today;
-            document.getElementById('report-to').value = today;
-            
-            // Load initial data
-            loadQueue();
-        }
-
-        function showPage(pageName) {
-            // Hide all pages
-            document.querySelectorAll('.page').forEach(page => {
-                page.classList.remove('active');
-            });
-            
-            // Show selected page
-            document.getElementById(pageName).classList.add('active');
-            
-            // Update active nav button
-            document.querySelectorAll('.nav-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            event.target.classList.add('active');
-        }
-
-        function addPassenger() {
-            const passengersList = document.getElementById('passengers-list');
-            const newRow = document.createElement('div');
-            newRow.className = 'passenger-row';
-            newRow.innerHTML = `
-                <input type="text" placeholder="Name *" class="passenger-name" required>
-                <input type="number" placeholder="Age" class="passenger-age" min="1" max="120">
-                <select class="passenger-gender">
-                    <option value="">Gender</option>
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                    <option value="Other">Other</option>
-                </select>
-                <input type="tel" placeholder="Mobile" class="passenger-mobile">
-            `;
-            passengersList.appendChild(newRow);
-        }
-
-        function saveCall(action) {
-            // Validate form
-            const fromStation = document.getElementById('from-station').value;
-            const toStation = document.getElementById('to-station').value;
-            const journeyClass = document.getElementById('class').value;
-            const journeyDate = document.getElementById('journey-date').value;
-            
-            if (!fromStation || !toStation || !journeyClass || !journeyDate) {
-                alert('Please fill all required fields');
-                return;
-            }
-            
-            // Gather passenger data
-            const passengerRows = document.querySelectorAll('.passenger-row');
-            const passengers = [];
-            
-            passengerRows.forEach(row => {
-                const name = row.querySelector('.passenger-name').value;
-                if (name) {
-                    passengers.push({
-                        name: name,
-                        age: row.querySelector('.passenger-age').value,
-                        gender: row.querySelector('.passenger-gender').value,
-                        mobile: row.querySelector('.passenger-mobile').value
-                    });
-                }
-            });
-            
-            if (passengers.length === 0) {
-                alert('Please add at least one passenger');
-                return;
-            }
-            
-            // Create ticket
-            const ticket = {
-                id: 'T' + Date.now(),
-                from_station: fromStation,
-                to_station: toStation,
-                class: journeyClass,
-                journey_date: journeyDate,
-                passengers: passengers,
-                primary_mobile: passengers[0].mobile,
-                status: action === 'queue' ? 'received' : 'draft',
-                created_at: new Date().toISOString(),
-                created_by: currentUser.email,
-                remark: document.getElementById('remark').value
-            };
-            
-            tickets.push(ticket);
-            localStorage.setItem('tickets', JSON.stringify(tickets));
-            
-            alert(`Ticket ${action === 'queue' ? 'saved and sent to queue' : 'saved as draft'} successfully!`);
-            
-            // Reset form
-            document.getElementById('call-form').reset();
-            document.getElementById('passengers-list').innerHTML = `
-                <div class="passenger-row">
-                    <input type="text" placeholder="Name *" class="passenger-name" required>
-                    <input type="number" placeholder="Age" class="passenger-age" min="1" max="120">
-                    <select class="passenger-gender">
-                        <option value="">Gender</option>
-                        <option value="Male">Male</option>
-                        <option value="Female">Female</option>
-                        <option value="Other">Other</option>
-                    </select>
-                    <input type="tel" placeholder="Mobile" class="passenger-mobile">
-                </div>
-            `;
-            
-            if (action === 'queue') {
-                showPage('queue');
-                loadQueue();
-            }
-        }
-
-        function loadQueue() {
-            const filter = document.getElementById('queue-filter').value;
-            const queueContent = document.getElementById('queue-content');
-            
-            let filteredTickets = tickets;
-            if (filter !== 'all') {
-                filteredTickets = tickets.filter(ticket => ticket.status === filter);
-            }
-            
-            if (filteredTickets.length === 0) {
-                queueContent.innerHTML = '<p>No tickets found.</p>';
-                return;
-            }
-            
-            queueContent.innerHTML = filteredTickets.map(ticket => `
-                <div class="queue-item">
-                    <div style="display: flex; justify-content: between; align-items: start; margin-bottom: 10px;">
-                        <div style="flex: 1;">
-                            <h4>${ticket.passengers[0].name}</h4>
-                            <p>${ticket.from_station} → ${ticket.to_station} • ${ticket.class}</p>
-                            <p>Date: ${new Date(ticket.journey_date).toLocaleDateString()} • Passengers: ${ticket.passengers.length}</p>
-                            <p>Mobile: ${ticket.primary_mobile || 'N/A'}</p>
-                            ${ticket.remark ? `<p><strong>Remarks:</strong> ${ticket.remark}</p>` : ''}
-                        </div>
-                        <div>
-                            <span class="status-badge status-${ticket.status}">${ticket.status}</span>
-                        </div>
-                    </div>
-                    <div>
-                        <button onclick="markAsBooked('${ticket.id}')" class="btn-primary" style="margin-right: 10px;">
-                            Mark as Booked
-                        </button>
-                        <button onclick="deleteTicket('${ticket.id}')" class="btn-secondary">
-                            Delete
-                        </button>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function markAsBooked(ticketId) {
-            const ticket = tickets.find(t => t.id === ticketId);
-            if (ticket) {
-                ticket.status = 'booked';
-                ticket.booked_at = new Date().toISOString();
-                localStorage.setItem('tickets', JSON.stringify(tickets));
-                loadQueue();
-                alert('Ticket marked as booked!');
-            }
-        }
-
-        function deleteTicket(ticketId) {
-            if (confirm('Are you sure you want to delete this ticket?')) {
-                tickets = tickets.filter(t => t.id !== ticketId);
-                localStorage.setItem('tickets', JSON.stringify(tickets));
-                loadQueue();
-            }
-        }
-
-        function generateReport() {
-            const fromDate = document.getElementById('report-from').value;
-            const toDate = document.getElementById('report-to').value;
-            
-            const filteredTickets = tickets.filter(ticket => {
-                const ticketDate = ticket.journey_date;
-                return ticketDate >= fromDate && ticketDate <= toDate;
-            });
-            
-            const reportContent = document.getElementById('report-content');
-            
-            const receivedCount = filteredTickets.filter(t => t.status === 'received').length;
-            const bookedCount = filteredTickets.filter(t => t.status === 'booked').length;
-            const draftCount = filteredTickets.filter(t => t.status === 'draft').length;
-            
-            reportContent.innerHTML = `
-                <div class="call-form">
-                    <h3>Report: ${fromDate} to ${toDate}</h3>
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin: 20px 0;">
-                        <div style="text-align: center; padding: 20px; background: #e3f2fd; border-radius: 10px;">
-                            <div style="font-size: 2rem; font-weight: bold; color: #1976d2;">${filteredTickets.length}</div>
-                            <div>Total Tickets</div>
-                        </div>
-                        <div style="text-align: center; padding: 20px; background: #e8f5e8; border-radius: 10px;">
-                            <div style="font-size: 2rem; font-weight: bold; color: #388e3c;">${bookedCount}</div>
-                            <div>Booked</div>
-                        </div>
-                        <div style="text-align: center; padding: 20px; background: #fff3e0; border-radius: 10px;">
-                            <div style="font-size: 2rem; font-weight: bold; color: #f57c00;">${receivedCount}</div>
-                            <div>Pending</div>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        function saveDraft() {
-            alert('Draft saved to local storage!');
-            // You can implement actual draft saving here
-        }
-
-        function initializeDemoData() {
-            if (tickets.length === 0) {
-                tickets = [
-                    {
-                        id: 'T1',
-                        from_station: 'Delhi',
-                        to_station: 'Mumbai',
-                        class: '3A',
-                        journey_date: new Date().toISOString().split('T')[0],
-                        passengers: [{ name: 'Raj Kumar', age: '35', gender: 'Male', mobile: '9876543210' }],
-                        primary_mobile: '9876543210',
-                        status: 'received',
-                        created_at: new Date().toISOString(),
-                        created_by: 'demo@example.com'
-                    },
-                    {
-                        id: 'T2',
-                        from_station: 'Chennai',
-                        to_station: 'Kolkata',
-                        class: 'Sleeper',
-                        journey_date: new Date().toISOString().split('T')[0],
-                        passengers: [{ name: 'Priya Singh', age: '28', gender: 'Female', mobile: '9876543211' }],
-                        primary_mobile: '9876543211',
-                        status: 'booked',
-                        created_at: new Date().toISOString(),
-                        created_by: 'demo@example.com'
-                    }
-                ];
-                localStorage.setItem('tickets', JSON.stringify(tickets));
-                loadQueue();
-                alert('Demo data loaded! Check the Queue tab.');
-            }
-        }
-
-        function logout() {
-            currentUser = null;
-            document.getElementById('main-app').classList.remove('active');
-            document.getElementById('login-screen').classList.add('active');
-            document.getElementById('login-email').value = '';
-            document.getElementById('login-status').textContent = '';
-            document.getElementById('login-status').style.display = 'none';
-        }
-
-        // Event listeners
-        document.addEventListener('DOMContentLoaded', function() {
-            // Enter key support for login
-            document.getElementById('login-email').addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    handleLogin();
-                }
-            });
-            
-            // Load demo data if empty
-            if (tickets.length === 0) {
-                initializeDemoData();
-            }
-        });
-    </script>
+    <script src="app.js"></script>
 </body>
 </html>
