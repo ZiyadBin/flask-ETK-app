@@ -4,6 +4,32 @@ const CONFIG = {
 };
 
 let currentUser = null;
+let tickets = [];
+
+// API function to call Apps Script
+async function callAppsScript(endpoint, data) {
+    if (!CONFIG.scriptUrl) {
+        throw new Error('Apps Script URL not configured. Go to Admin page to set it.');
+    }
+
+    console.log('Calling endpoint:', endpoint, 'with data:', data);
+
+    const response = await fetch(`${CONFIG.scriptUrl}?path=${endpoint}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+    });
+
+    const result = await response.json();
+    
+    if (!result.success) {
+        throw new Error(result.error);
+    }
+    
+    return result.data;
+}
 
 // Test backend connection
 async function testBackend() {
@@ -14,7 +40,7 @@ async function testBackend() {
     try {
         const response = await fetch(CONFIG.scriptUrl);
         const result = await response.json();
-        return { connected: true, message: 'Backend connected' };
+        return { connected: true, message: 'Backend connected successfully' };
     } catch (error) {
         return { connected: false, message: 'Connection failed: ' + error.message };
     }
@@ -27,25 +53,42 @@ async function handleLogin() {
     const email = emailInput.value.trim();
     
     if (!email) {
-        showStatus('Please enter your email', 'error');
+        showStatus('Please enter your email address', 'error');
         return;
     }
 
-    showStatus('Logging in...', 'info');
+    showStatus('Connecting to server...', 'info');
 
     try {
-        // For demo - simulate login
+        // First, test if backend is connected
+        const backendStatus = await testBackend();
+        if (!backendStatus.connected) {
+            showStatus('Backend not connected: ' + backendStatus.message, 'error');
+            return;
+        }
+
+        // Try to login via Apps Script
+        const user = await callAppsScript('login', { email: email });
+        currentUser = user;
+        
+        showMainApp();
+        showStatus('Login successful! Welcome ' + user.email, 'success');
+        
+        // Load initial data
+        loadQueue();
+        
+    } catch (error) {
+        // If login fails, use demo mode
+        console.log('Login failed, using demo mode:', error.message);
         currentUser = {
             email: email,
             staff_id: 'user_' + Math.random().toString(36).substr(2, 5),
-            role: 'staff'
+            role: 'staff',
+            demo: true
         };
         
         showMainApp();
-        showStatus('Login successful!', 'success');
-        
-    } catch (error) {
-        showStatus('Login error: ' + error.message, 'error');
+        showStatus('Demo mode activated. Backend connection issue: ' + error.message, 'warning');
     }
 }
 
@@ -60,11 +103,14 @@ function showMainApp() {
     document.getElementById('login-screen').classList.remove('active');
     document.getElementById('main-app').classList.add('active');
     
-    document.getElementById('user-name').textContent = currentUser.email;
+    const roleText = currentUser.demo ? ' (Demo Mode)' : ` (${currentUser.role})`;
+    document.getElementById('user-name').textContent = currentUser.email + roleText;
     
     // Set today's date
     const today = new Date().toISOString().split('T')[0];
     document.getElementById('journey-date').value = today;
+    document.getElementById('report-from').value = today;
+    document.getElementById('report-to').value = today;
 }
 
 function showPage(pageName) {
@@ -81,6 +127,15 @@ function showPage(pageName) {
         btn.classList.remove('active');
     });
     event.target.classList.add('active');
+    
+    // Load page-specific data
+    if (pageName === 'queue') {
+        loadQueue();
+    } else if (pageName === 'reports') {
+        generateReport();
+    } else if (pageName === 'admin') {
+        checkBackendStatus();
+    }
 }
 
 function addPassenger() {
@@ -94,13 +149,14 @@ function addPassenger() {
             <option value="">Gender</option>
             <option value="Male">Male</option>
             <option value="Female">Female</option>
+            <option value="Other">Other</option>
         </select>
         <input type="tel" placeholder="Mobile" class="passenger-mobile">
     `;
     passengersList.appendChild(newRow);
 }
 
-function saveCall() {
+async function saveCall() {
     const fromStation = document.getElementById('from-station').value;
     const toStation = document.getElementById('to-station').value;
     const journeyClass = document.getElementById('class').value;
@@ -132,9 +188,47 @@ function saveCall() {
         return;
     }
 
-    alert('Ticket saved successfully!\n\nIn production, this would connect to Google Apps Script backend.');
-    
-    // Reset form
+    try {
+        const callData = {
+            staff_id: currentUser.staff_id,
+            from_station: fromStation,
+            to_station: toStation,
+            class: journeyClass,
+            journey_date: journeyDate,
+            passengers: passengers,
+            primary_mobile: passengers[0]?.mobile || '',
+            remark: document.getElementById('remark').value
+        };
+
+        if (currentUser.demo) {
+            // Demo mode - save to local storage
+            const ticket = {
+                id: 'T' + Date.now(),
+                ...callData,
+                status: 'received',
+                created_at: new Date().toISOString()
+            };
+            tickets.push(ticket);
+            localStorage.setItem('demo_tickets', JSON.stringify(tickets));
+            alert('Demo: Ticket saved locally (not in Google Sheets)');
+        } else {
+            // Real mode - save to Apps Script
+            const result = await callAppsScript('addCall', callData);
+            alert('Ticket saved successfully to Google Sheets!');
+        }
+        
+        // Reset form
+        resetForm();
+        
+        // Show queue
+        showPage('queue');
+        
+    } catch (error) {
+        alert('Error saving ticket: ' + error.message);
+    }
+}
+
+function resetForm() {
     document.getElementById('from-station').value = '';
     document.getElementById('to-station').value = '';
     document.getElementById('class').value = '';
@@ -147,10 +241,139 @@ function saveCall() {
                 <option value="">Gender</option>
                 <option value="Male">Male</option>
                 <option value="Female">Female</option>
+                <option value="Other">Other</option>
             </select>
             <input type="tel" placeholder="Mobile" class="passenger-mobile">
         </div>
     `;
+}
+
+async function loadQueue() {
+    const queueContent = document.getElementById('queue-content');
+    
+    try {
+        if (currentUser.demo) {
+            // Demo mode - load from local storage
+            tickets = JSON.parse(localStorage.getItem('demo_tickets') || '[]');
+            displayQueue(tickets);
+        } else {
+            // Real mode - load from Apps Script
+            const queueData = await callAppsScript('getQueue', { status: 'all' });
+            displayQueue(queueData);
+        }
+    } catch (error) {
+        queueContent.innerHTML = `<div class="error">Error loading queue: ${error.message}</div>`;
+    }
+}
+
+function displayQueue(tickets) {
+    const queueContent = document.getElementById('queue-content');
+    
+    if (tickets.length === 0) {
+        queueContent.innerHTML = '<p>No tickets found. Create your first ticket in Quick Entry!</p>';
+        return;
+    }
+    
+    queueContent.innerHTML = tickets.map(ticket => `
+        <div class="queue-item">
+            <div class="queue-header">
+                <div class="passenger-info">
+                    <h4>${ticket.passengers[0]?.name || 'Unknown Passenger'}</h4>
+                    <p><strong>Route:</strong> ${ticket.from_station} → ${ticket.to_station}</p>
+                    <p><strong>Class:</strong> ${ticket.class} | <strong>Date:</strong> ${new Date(ticket.journey_date).toLocaleDateString()}</p>
+                    <p><strong>Passengers:</strong> ${ticket.passengers.length} | <strong>Mobile:</strong> ${ticket.primary_mobile || 'N/A'}</p>
+                    ${ticket.remark ? `<p><strong>Remarks:</strong> ${ticket.remark}</p>` : ''}
+                    <p><small>Created: ${new Date(ticket.created_at).toLocaleString()}</small></p>
+                </div>
+                <div class="queue-actions">
+                    <span class="status-badge status-${ticket.status}">${ticket.status}</span>
+                    ${!currentUser.demo ? `
+                        <button onclick="markAsBooked('${ticket.id}')" class="btn-primary" style="margin-top: 10px;">
+                            Mark as Booked
+                        </button>
+                    ` : ''}
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+async function markAsBooked(ticketId) {
+    try {
+        const bookingData = {
+            call_id: ticketId,
+            ticket_number: 'TKT' + Date.now(),
+            service_charge: 50,
+            payment_status: 'paid',
+            staff_id: currentUser.staff_id
+        };
+
+        await callAppsScript('markBooked', bookingData);
+        alert('Ticket marked as booked!');
+        loadQueue();
+    } catch (error) {
+        alert('Error marking as booked: ' + error.message);
+    }
+}
+
+async function generateReport() {
+    const fromDate = document.getElementById('report-from').value;
+    const toDate = document.getElementById('report-to').value;
+    const reportContent = document.getElementById('report-content');
+    
+    try {
+        if (currentUser.demo) {
+            // Demo report
+            const demoData = JSON.parse(localStorage.getItem('demo_tickets') || '[]');
+            const receivedCount = demoData.filter(t => t.status === 'received').length;
+            const totalCount = demoData.length;
+            
+            reportContent.innerHTML = `
+                <div class="call-form">
+                    <h3>Demo Report: ${fromDate} to ${toDate}</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin: 20px 0;">
+                        <div style="text-align: center; padding: 20px; background: #e3f2fd; border-radius: 10px;">
+                            <div style="font-size: 2rem; font-weight: bold; color: #1976d2;">${totalCount}</div>
+                            <div>Total Tickets</div>
+                        </div>
+                        <div style="text-align: center; padding: 20px; background: #fff3e0; border-radius: 10px;">
+                            <div style="font-size: 2rem; font-weight: bold; color: #f57c00;">${receivedCount}</div>
+                            <div>Pending</div>
+                        </div>
+                    </div>
+                    <p><em>This is demo data. Connect to backend for real reports.</em></p>
+                </div>
+            `;
+        } else {
+            // Real report from Apps Script
+            const reportData = await callAppsScript('getReport', {
+                date_from: fromDate,
+                date_to: toDate
+            });
+            
+            reportContent.innerHTML = `
+                <div class="call-form">
+                    <h3>Report: ${fromDate} to ${toDate}</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin: 20px 0;">
+                        <div style="text-align: center; padding: 20px; background: #e3f2fd; border-radius: 10px;">
+                            <div style="font-size: 2rem; font-weight: bold; color: #1976d2;">${reportData.totals.calls}</div>
+                            <div>Total Calls</div>
+                        </div>
+                        <div style="text-align: center; padding: 20px; background: #e8f5e8; border-radius: 10px;">
+                            <div style="font-size: 2rem; font-weight: bold; color: #388e3c;">${reportData.totals.booked}</div>
+                            <div>Booked</div>
+                        </div>
+                        <div style="text-align: center; padding: 20px; background: #fff3e0; border-radius: 10px;">
+                            <div style="font-size: 2rem; font-weight: bold; color: #f57c00;">${reportData.totals.pending}</div>
+                            <div>Pending</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+    } catch (error) {
+        reportContent.innerHTML = `<div class="error">Error generating report: ${error.message}</div>`;
+    }
 }
 
 function saveScriptUrl() {
@@ -162,20 +385,37 @@ function saveScriptUrl() {
         return;
     }
     
+    // Validate URL format
+    if (!url.startsWith('https://script.google.com/')) {
+        alert('Please enter a valid Google Apps Script URL');
+        return;
+    }
+    
     CONFIG.scriptUrl = url;
     localStorage.setItem('scriptUrl', url);
     
     checkBackendStatus();
-    alert('URL saved successfully!');
+    alert('Apps Script URL saved successfully!');
 }
 
 async function checkBackendStatus() {
     const statusElement = document.getElementById('backend-status');
-    statusElement.textContent = 'Checking...';
+    statusElement.textContent = 'Checking connection...';
     
-    const result = await testBackend();
-    statusElement.textContent = result.connected ? '✅ Connected' : '❌ Disconnected';
-    statusElement.className = result.connected ? 'connected' : 'disconnected';
+    try {
+        const result = await testBackend();
+        if (result.connected) {
+            statusElement.textContent = '✅ Connected to Apps Script';
+            statusElement.style.color = 'green';
+            statusElement.style.fontWeight = 'bold';
+        } else {
+            statusElement.textContent = '❌ ' + result.message;
+            statusElement.style.color = 'red';
+        }
+    } catch (error) {
+        statusElement.textContent = '❌ Error: ' + error.message;
+        statusElement.style.color = 'red';
+    }
 }
 
 function logout() {
@@ -184,6 +424,7 @@ function logout() {
     document.getElementById('login-screen').classList.add('active');
     document.getElementById('login-email').value = '';
     document.getElementById('login-status').textContent = '';
+    document.getElementById('login-status').style.display = 'none';
 }
 
 // Initialize
@@ -203,4 +444,9 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('script-url').value = savedUrl;
         CONFIG.scriptUrl = savedUrl;
     }
+    
+    // Load demo tickets
+    tickets = JSON.parse(localStorage.getItem('demo_tickets') || '[]');
+    
+    console.log('Train Ticket System initialized');
 });
