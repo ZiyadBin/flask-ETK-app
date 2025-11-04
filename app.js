@@ -9,29 +9,43 @@ const CONFIG = {
 let currentUser = null;
 let tickets = [];
 
-// API function to call Apps Script
+// Replace the callAppsScript function with this:
 async function callAppsScript(endpoint, data) {
     if (!CONFIG.scriptUrl) {
-        throw new Error('Apps Script URL not configured. Go to Admin page to set it.');
+        throw new Error('Apps Script URL not configured');
     }
 
-    console.log('Calling endpoint:', endpoint, 'with data:', data);
+    // Create a unique callback name for JSONP
+    const callbackName = 'jsonp_callback_' + Math.round(100000 * Math.random());
+    
+    return new Promise((resolve, reject) => {
+        // Create JSONP script tag
+        const script = document.createElement('script');
+        const url = `${CONFIG.scriptUrl}?path=${endpoint}&callback=${callbackName}`;
+        
+        window[callbackName] = function(response) {
+            delete window[callbackName];
+            document.body.removeChild(script);
+            
+            if (response.success) {
+                resolve(response.data);
+            } else {
+                reject(new Error(response.error));
+            }
+        };
 
-    const response = await fetch(`${CONFIG.scriptUrl}?path=${endpoint}`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data)
+        script.src = url;
+        document.body.appendChild(script);
+        
+        // Timeout after 10 seconds
+        setTimeout(() => {
+            if (window[callbackName]) {
+                delete window[callbackName];
+                document.body.removeChild(script);
+                reject(new Error('Request timeout'));
+            }
+        }, 10000);
     });
-
-    const result = await response.json();
-    
-    if (!result.success) {
-        throw new Error(result.error);
-    }
-    
-    return result.data;
 }
 
 // Test backend connection
