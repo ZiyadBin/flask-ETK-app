@@ -1,5 +1,5 @@
-// TEMPORARY FIX - Add this line at the very top of app.js
-localStorage.setItem('scriptUrl', 'https://script.google.com/macros/s/AKfycbz7Yjp6W8URr8yi-RlilqxJR_fpbHmAmMy3Qmt8L6hlD24scIgyPuvBMRzVNBPmdV0m/exec');
+// Force demo mode
+window.forceDemoMode = true;
 // Configuration
 const CONFIG = {
     scriptUrl: localStorage.getItem('scriptUrl') || ''
