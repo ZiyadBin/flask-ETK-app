@@ -22,9 +22,8 @@
                         </button>
                     </div>
                     
-                    <p class="login-note">Your email must be authorized by admin</p>
+                    <p class="login-note">First time? Any email will work for setup</p>
                     <div id="login-status"></div>
-                    <div id="api-status" class="api-status"></div>
                 </div>
             </div>
         </div>
@@ -41,9 +40,9 @@
                 </div>
                 <nav class="app-nav">
                     <button class="nav-btn active" onclick="showPage('quick-entry')">Quick Entry</button>
-                    <button class="nav-btn" onclick="showPage('queue')">Ticket Queue</button>
+                    <button class="nav-btn" onclick="showPage('queue')">Queue</button>
                     <button class="nav-btn" onclick="showPage('reports')">Reports</button>
-                    <button class="nav-btn" onclick="showPage('admin')" id="admin-btn">Admin</button>
+                    <button class="nav-btn" onclick="showPage('admin')">Admin</button>
                 </nav>
             </header>
 
@@ -51,7 +50,6 @@
             <div id="quick-entry" class="page active">
                 <div class="page-header">
                     <h2>Quick Call Entry</h2>
-                    <button onclick="saveDraft()" class="btn-secondary">Save Draft</button>
                 </div>
                 
                 <div class="call-form">
@@ -71,7 +69,6 @@
                                 <option value="Sleeper">Sleeper</option>
                                 <option value="3A">3A</option>
                                 <option value="2A">2A</option>
-                                <option value="1A">1A</option>
                             </select>
                         </div>
                         <div class="form-group">
@@ -90,7 +87,6 @@
                                     <option value="">Gender</option>
                                     <option value="Male">Male</option>
                                     <option value="Female">Female</option>
-                                    <option value="Other">Other</option>
                                 </select>
                                 <input type="tel" placeholder="Mobile" class="passenger-mobile">
                             </div>
@@ -102,105 +98,53 @@
 
                     <div class="form-group">
                         <label for="remark">Remarks</label>
-                        <textarea id="remark" rows="3" placeholder="Any special requirements or notes..."></textarea>
+                        <textarea id="remark" rows="2" placeholder="Any notes..."></textarea>
                     </div>
 
                     <div class="form-actions">
-                        <button type="button" onclick="saveCall('draft')" class="btn-secondary">Save as Draft</button>
-                        <button type="button" onclick="saveCall('queue')" class="btn-primary">Save & Send to Queue</button>
-                    </div>
-                </div>
-
-                <!-- Duplicate Warning -->
-                <div id="duplicate-warning" class="warning-banner hidden">
-                    <div class="warning-content">
-                        <strong>Possible duplicate found!</strong>
-                        <span id="duplicate-count"></span>
-                        <button onclick="showDuplicateDetails()" class="btn-text">View Details</button>
+                        <button type="button" onclick="saveCall()" class="btn-primary">Save Ticket</button>
                     </div>
                 </div>
             </div>
 
-            <!-- Other pages (Queue, Reports, Admin) -->
+            <!-- Queue Page -->
             <div id="queue" class="page">
                 <div class="page-header">
                     <h2>Ticket Queue</h2>
-                    <div>
-                        <select id="queue-filter" onchange="loadQueue()">
-                            <option value="all">All Tickets</option>
-                            <option value="received">Received</option>
-                            <option value="assigned">Assigned</option>
-                            <option value="booked">Booked</option>
-                        </select>
-                    </div>
                 </div>
                 <div id="queue-content">
-                    <!-- Tickets will be loaded here -->
+                    <p>Tickets will appear here when saved</p>
                 </div>
             </div>
 
+            <!-- Reports Page -->
             <div id="reports" class="page">
                 <div class="page-header">
                     <h2>Reports</h2>
-                    <div>
-                        <input type="date" id="report-from">
-                        <input type="date" id="report-to">
-                        <button onclick="generateReport()" class="btn-primary">Generate</button>
-                    </div>
                 </div>
                 <div id="report-content">
-                    <!-- Reports will appear here -->
+                    <p>Reports will be generated here</p>
                 </div>
             </div>
 
+            <!-- Admin Page -->
             <div id="admin" class="page">
                 <div class="page-header">
                     <h2>Admin Panel</h2>
                 </div>
                 <div class="call-form">
-                    <h3>System Configuration</h3>
-                    <div class="form-group">
-                        <label>Backend Status:</label>
-                        <span id="backend-status">Checking...</span>
-                    </div>
+                    <h3>Backend Setup</h3>
                     <div class="form-group">
                         <label>Apps Script URL:</label>
-                        <input type="text" id="script-url" placeholder="Paste your Apps Script URL here">
+                        <input type="text" id="script-url" placeholder="Paste your Apps Script URL" style="width: 100%; padding: 10px; margin: 5px 0;">
                         <button onclick="saveScriptUrl()" class="btn-primary">Save URL</button>
+                    </div>
+                    <div class="form-group">
+                        <label>Backend Status:</label>
+                        <span id="backend-status">Not configured</span>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
-
-    <!-- Modals -->
-    <div id="booking-modal" class="modal hidden">
-        <div class="modal-content">
-            <h3>Mark as Booked</h3>
-            <form id="booking-form">
-                <input type="hidden" id="booking-call-id">
-                <div class="form-group">
-                    <label for="ticket-number">Ticket Number *</label>
-                    <input type="text" id="ticket-number" required>
-                </div>
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="service-charge">Service Charge</label>
-                        <input type="number" id="service-charge" step="0.01">
-                    </div>
-                    <div class="form-group">
-                        <label for="payment-status">Payment Status</label>
-                        <select id="payment-status">
-                            <option value="unpaid">Unpaid</option>
-                            <option value="paid">Paid</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="modal-actions">
-                    <button type="button" onclick="closeModal('booking-modal')" class="btn-secondary">Cancel</button>
-                    <button type="submit" class="btn-primary">Save Booking</button>
-                </div>
-            </form>
         </div>
     </div>
 
@@ -210,11 +154,6 @@
         <option value="Chennai">
         <option value="Kolkata">
         <option value="Bengaluru">
-        <option value="Hyderabad">
-        <option value="Ahmedabad">
-        <option value="Pune">
-        <option value="Jaipur">
-        <option value="Lucknow">
     </datalist>
 
     <script src="app.js"></script>
