@@ -1,161 +1,215 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Train Ticket System</title>
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Train Ticket System — Beyond Earth Stories</title>
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-    <div id="app">
-        <!-- Login Screen -->
-        <div id="login-screen" class="screen active">
-            <div class="login-container">
-                <div class="login-box">
-                    <h1>🚆 Train Ticket System</h1>
-                    <p>Enter your email to continue</p>
-                    
-                    <div class="login-form">
-                        <input type="email" id="login-email" placeholder="your@email.com" required>
-                        <button type="button" class="login-btn" onclick="handleLogin()">
-                            Sign In
-                        </button>
-                    </div>
-                    
-                    <p class="login-note">First time? Any email will work for setup</p>
-                    <div id="login-status"></div>
-                </div>
-            </div>
+  <div id="app">
+    <!-- LOGIN SCREEN -->
+    <div id="login-screen" class="screen active">
+      <div class="login-container">
+        <div class="login-box">
+          <h1>🚆 Train Ticket System</h1>
+          <p class="muted">Fast call entry • Duplicate detection • Simple reports</p>
+
+          <div class="login-form">
+            <input type="email" id="login-email" placeholder="your@email.com" required>
+            <button type="button" class="login-btn" onclick="handleLogin()">Sign In</button>
+          </div>
+
+          <p class="login-note">First time? Use any email for initial setup. Admin will be added automatically.</p>
+          <div id="login-status" class="hidden"></div>
         </div>
-
-        <!-- Main App -->
-        <div id="main-app" class="screen">
-            <header class="app-header">
-                <div class="header-content">
-                    <h2>Train Ticket System</h2>
-                    <div class="user-info">
-                        <span id="user-name"></span>
-                        <button onclick="logout()" class="btn-secondary">Logout</button>
-                    </div>
-                </div>
-                <nav class="app-nav">
-                    <button class="nav-btn active" onclick="showPage('quick-entry')">Quick Entry</button>
-                    <button class="nav-btn" onclick="showPage('queue')">Queue</button>
-                    <button class="nav-btn" onclick="showPage('reports')">Reports</button>
-                    <button class="nav-btn" onclick="showPage('admin')">Admin</button>
-                </nav>
-            </header>
-
-            <!-- Quick Entry Page -->
-            <div id="quick-entry" class="page active">
-                <div class="page-header">
-                    <h2>Quick Call Entry</h2>
-                </div>
-                
-                <div class="call-form">
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label for="from-station">From Station *</label>
-                            <input type="text" id="from-station" list="stations" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="to-station">To Station *</label>
-                            <input type="text" id="to-station" list="stations" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="class">Class *</label>
-                            <select id="class" required>
-                                <option value="">Select Class</option>
-                                <option value="Sleeper">Sleeper</option>
-                                <option value="3A">3A</option>
-                                <option value="2A">2A</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="journey-date">Journey Date *</label>
-                            <input type="date" id="journey-date" required>
-                        </div>
-                    </div>
-
-                    <div class="passengers-section">
-                        <h3>Passengers</h3>
-                        <div id="passengers-list">
-                            <div class="passenger-row">
-                                <input type="text" placeholder="Name *" class="passenger-name" required>
-                                <input type="number" placeholder="Age" class="passenger-age" min="1" max="120">
-                                <select class="passenger-gender">
-                                    <option value="">Gender</option>
-                                    <option value="Male">Male</option>
-                                    <option value="Female">Female</option>
-                                </select>
-                                <input type="tel" placeholder="Mobile" class="passenger-mobile">
-                            </div>
-                        </div>
-                        <button type="button" onclick="addPassenger()" class="btn-secondary">
-                            + Add Passenger
-                        </button>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="remark">Remarks</label>
-                        <textarea id="remark" rows="2" placeholder="Any notes..."></textarea>
-                    </div>
-
-                    <div class="form-actions">
-                        <button type="button" onclick="saveCall()" class="btn-primary">Save Ticket</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Queue Page -->
-            <div id="queue" class="page">
-                <div class="page-header">
-                    <h2>Ticket Queue</h2>
-                </div>
-                <div id="queue-content">
-                    <p>Tickets will appear here when saved</p>
-                </div>
-            </div>
-
-            <!-- Reports Page -->
-            <div id="reports" class="page">
-                <div class="page-header">
-                    <h2>Reports</h2>
-                </div>
-                <div id="report-content">
-                    <p>Reports will be generated here</p>
-                </div>
-            </div>
-
-            <!-- Admin Page -->
-            <div id="admin" class="page">
-                <div class="page-header">
-                    <h2>Admin Panel</h2>
-                </div>
-                <div class="call-form">
-                    <h3>Backend Setup</h3>
-                    <div class="form-group">
-                        <label>Apps Script URL:</label>
-                        <input type="text" id="script-url" placeholder="Paste your Apps Script URL" style="width: 100%; padding: 10px; margin: 5px 0;">
-                        <button onclick="saveScriptUrl()" class="btn-primary">Save URL</button>
-                    </div>
-                    <div class="form-group">
-                        <label>Backend Status:</label>
-                        <span id="backend-status">Not configured</span>
-                    </div>
-                </div>
-            </div>
-        </div>
+      </div>
     </div>
 
-    <datalist id="stations">
-        <option value="Delhi">
-        <option value="Mumbai">
-        <option value="Chennai">
-        <option value="Kolkata">
-        <option value="Bengaluru">
-    </datalist>
+    <!-- MAIN APP -->
+    <div id="main-app" class="screen">
+      <header class="app-header">
+        <div class="header-content">
+          <div class="brand">
+            <h2>Train Ticket System</h2>
+            <p class="muted small">Ticket call intake & distributor</p>
+          </div>
 
-    <script src="app.js"></script>
+          <div class="user-info">
+            <div id="user-name" class="user-name">—</div>
+            <button class="btn-secondary small" onclick="logout()">Logout</button>
+          </div>
+        </div>
+
+        <nav class="app-nav">
+          <button class="nav-btn active" onclick="showPage('quick-entry', event)">Quick Entry</button>
+          <button class="nav-btn" onclick="showPage('queue', event)">Queue</button>
+          <button class="nav-btn" onclick="showPage('reports', event)">Reports</button>
+          <button class="nav-btn" onclick="showPage('admin', event)">Admin</button>
+        </nav>
+      </header>
+
+      <main class="container">
+
+        <!-- QUICK ENTRY PAGE -->
+        <section id="quick-entry" class="page active">
+          <div class="page-header">
+            <h3>Quick Call Entry</h3>
+            <div class="muted">Fast, keyboard-friendly form for staff on the phone</div>
+          </div>
+
+          <div class="call-form">
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="from-station">From Station *</label>
+                <input id="from-station" list="stations" placeholder="e.g., Tirur">
+              </div>
+
+              <div class="form-group">
+                <label for="to-station">To Station *</label>
+                <input id="to-station" list="stations" placeholder="e.g., Delhi">
+              </div>
+
+              <div class="form-group">
+                <label for="class">Class *</label>
+                <select id="class">
+                  <option value="">Select Class</option>
+                  <option value="Sleeper">Sleeper</option>
+                  <option value="3A">3A</option>
+                  <option value="2A">2A</option>
+                  <option value="CC">CC</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="journey-date">Journey Date *</label>
+                <input type="date" id="journey-date">
+              </div>
+            </div>
+
+            <div class="passengers-section">
+              <div class="section-header">
+                <h4>Passengers</h4>
+                <div class="muted">Add minimal details — name and mobile are most important</div>
+              </div>
+
+              <div id="passengers-list">
+                <div class="passenger-row">
+                  <input type="text" placeholder="Name *" class="passenger-name" required>
+                  <input type="number" placeholder="Age" class="passenger-age" min="1" max="120">
+                  <select class="passenger-gender">
+                    <option value="">Gender</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                  </select>
+                  <input type="tel" placeholder="Mobile" class="passenger-mobile">
+                </div>
+              </div>
+
+              <div style="margin-top:10px;">
+                <button type="button" class="btn-secondary" onclick="addPassenger()">+ Add Passenger</button>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="remark">Remarks</label>
+              <textarea id="remark" rows="2" placeholder="Any quick notes..."></textarea>
+            </div>
+
+            <div class="form-actions">
+              <button class="btn-primary" onclick="saveCall()">Save Ticket</button>
+              <button class="btn-secondary" onclick="resetForm()">Reset</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- QUEUE PAGE -->
+        <section id="queue" class="page">
+          <div class="page-header">
+            <h3>Ticket Queue</h3>
+            <div class="muted">Sort, inspect duplicates and mark bookings</div>
+          </div>
+
+          <div class="call-form">
+            <div id="queue-content">
+              <p>Tickets will appear here after saving from Quick Entry.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- REPORTS PAGE -->
+        <section id="reports" class="page">
+          <div class="page-header">
+            <h3>Reports</h3>
+            <div class="muted">Daily / custom range reports and staff performance</div>
+          </div>
+
+          <div class="call-form">
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="report-from">From</label>
+                <input type="date" id="report-from">
+              </div>
+              <div class="form-group">
+                <label for="report-to">To</label>
+                <input type="date" id="report-to">
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button class="btn-primary" onclick="generateReport()">Generate Report</button>
+            </div>
+
+            <div id="report-content" style="margin-top:20px;">
+              <p>Reports will be generated here.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- ADMIN PAGE -->
+        <section id="admin" class="page">
+          <div class="page-header">
+            <h3>Admin Panel</h3>
+            <div class="muted">Backend configuration and status (only visible to admins)</div>
+          </div>
+
+          <div class="call-form">
+            <div class="form-group">
+              <label for="script-url">Apps Script URL</label>
+              <input type="text" id="script-url" placeholder="Paste your Apps Script Exec URL (https://script.google.com/.../exec)">
+              <div style="margin-top:8px;">
+                <button class="btn-primary" onclick="saveScriptUrl()">Save URL</button>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Backend Status</label>
+              <div id="backend-status" class="muted">Not configured</div>
+            </div>
+
+            <div class="form-group" style="margin-top:12px;">
+              <small class="muted">To initialize sheets: open Apps Script editor and run any function (initializeSheets) once. Add staff emails to AllowedUsers sheet for login.</small>
+            </div>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <datalist id="stations">
+    <option value="Tirur">
+    <option value="Delhi">
+    <option value="Chennai">
+    <option value="Surat">
+    <option value="Mumbai">
+    <option value="Kozhikode">
+    <option value="Kannur">
+    <option value="Malappuram">
+    <option value="Bengaluru">
+  </datalist>
+
+  <script src="app.js"></script>
 </body>
 </html>
